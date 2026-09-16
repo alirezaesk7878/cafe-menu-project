@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#201a17" />
+  <title>منوی کافه</title>
+
+  <style>
+    :root {
+      --bg: #f7f3ee;
+      --surface: #fffdf9;
+      --text: #2b2522;
+      --muted: #776e68;
+      --accent: #7a4e32;
+      --accent-dark: #5e3a25;
+      --border: #e8ded4;
+      --danger: #a34545;
+      --shadow: 0 8px 30px rgba(56, 39, 28, 0.08);
+      --radius: 18px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top right, rgba(122, 78, 50, 0.07), transparent 30%),
+        var(--bg);
+      color: var(--text);
+      font-family: Tahoma, "Segoe UI", Arial, sans-serif;
+      line-height: 1.7;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .container {
+      width: min(100% - 28px, 900px);
+      margin-inline: auto;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 34px 0 26px;
+      background: linear-gradient(145deg, #241d19, #4b3125);
+      color: #fff;
+      border-bottom-left-radius: 28px;
+      border-bottom-right-radius: 28px;
+      box-shadow: 0 12px 35px rgba(45, 28, 19, 0.15);
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      width: 180px;
+      height: 180px;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 50%;
+      top: -80px;
+      left: -55px;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+
+    .brand-icon {
+      width: 62px;
+      height: 62px;
+      margin: 0 auto 12px;
+      display: grid;
+      place-items: center;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.16);
+      font-size: 30px;
+      backdrop-filter: blur(5px);
+    }
+
+    .hero h1 {
+      font-size: clamp(1.7rem, 7vw, 2.4rem);
+      font-weight: 800;
+      letter-spacing: -0.5px;
+    }
+
+    .hero p {
+      margin-top: 5px;
+      color: rgba(255,255,255,0.78);
+      font-size: 0.95rem;
+    }
+
+    .status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      min-height: 32px;
+      margin-top: 14px;
+      color: rgba(255,255,255,0.9);
+      font-size: 0.85rem;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #7ed957;
+      box-shadow: 0 0 0 4px rgba(126,217,87,0.12);
+    }
+
+    .status-dot.error {
+      background: #f27c7c;
+      box-shadow: 0 0 0 4px rgba(242,124,124,0.12);
+    }
+
+    .categories-wrap {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      margin-top: 18px;
+      padding: 7px;
+      background: rgba(247, 243, 238, 0.92);
+      backdrop-filter: blur(12px);
+    }
+
+    .categories {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 4px;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .categories::-webkit-scrollbar {
+      display: none;
+    }
+
+    .category-btn {
+      flex: 0 0 auto;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.82);
+      color: var(--muted);
+      padding: 9px 16px;
+      border-radius: 999px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: 0.2s ease;
+    }
+
+    .category-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .category-btn.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+      box-shadow: 0 5px 16px rgba(122, 78, 50, 0.22);
+    }
+
+    .main {
+      padding: 4px 0 34px;
+    }
+
+    .state {
+      margin: 26px 0;
+      padding: 28px 18px;
+      text-align: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .state.hidden {
+      display: none;
+    }
+
+    .state-icon {
+      font-size: 2.2rem;
+      margin-bottom: 8px;
+    }
+
+    .state h2 {
+      font-size: 1.05rem;
+      margin-bottom: 5px;
+    }
+
+    .state p {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .retry-btn {
+      margin-top: 16px;
+      border: 0;
+      border-radius: 12px;
+      background: var(--accent);
+      color: #fff;
+      padding: 10px 18px;
+      cursor: pointer;
+    }
+
+    .retry-btn:hover {
+      background: var(--accent-dark);
+    }
+
+    .menu-section {
+      scroll-margin-top: 82px;
+      margin-top: 26px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.18rem;
+      font-weight: 800;
+    }
+
+    .section-title::before {
+      content: "";
+      width: 5px;
+      height: 25px;
+      border-radius: 99px;
+      background: var(--accent);
+    }
+
+    .count {
+      color: var(--muted);
+      font-size: 0.82rem;
+      white-space: nowrap;
+    }
+
+    .products {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+
+    .product-card {
+      display: flex;
+      align-items: stretch;
+      gap: 13px;
+      padding: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .product-card:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 11px 30px rgba(56, 39, 28, 0.11);
+    }
+
+    .product-card.unavailable {
+      opacity: 0.58;
+      filter: saturate(0.7);
+    }
+
+    .product-image-wrap {
+      position: relative;
+      flex: 0 0 108px;
+      width: 108px;
+      min-height: 108px;
+      border-radius: 14px;
+      overflow: hidden;
+      background:
+        linear-gradient(135deg, #ece3da, #dcd0c5);
+    }
+
+    .product-image {
+      width: 100%;
+      height: 100%;
+      min-height: 108px;
+      display: block;
+      object-fit: cover;
+    }
+
+    .image-fallback {
+      position: absolute;
+      inset: 0;
+      display: none;
+      place-items: center;
+      color: #725945;
+      font-size: 1.8rem;
+    }
+
+    .product-info {
+      min-width: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .product-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .product-name {
+      font-size: 1rem;
+      line-height: 1.45;
+      font-weight: 800;
+    }
+
+    .badge {
+      flex: 0 0 auto;
+      padding: 3px 7px;
+      border-radius: 8px;
+      background: #f3dddd;
+      color: var(--danger);
+      font-size: 0.7rem;
+      font-weight: 700;
+    }
+
+    .description {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.65;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .price {
+      margin-top: auto;
+      padding-top: 9px;
+      color: var(--accent-dark);
+      font-size: 0.98rem;
+      font-weight: 900;
+    }
+
+    .price span {
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 600;
+      margin-right: 3px;
+    }
+
+    .empty-category {
+      padding: 18px;
+      text-align: center;
+      color: var(--muted);
+      background: rgba(255,255,255,0.55);
+      border: 1px dashed var(--border);
+      border-radius: 14px;
+      font-size: 0.88rem;
+    }
+
+    footer {
+      padding: 8px 0 28px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .skeleton {
+      height: 132px;
+      border-radius: var(--radius);
+      background: linear-gradient(
+        90deg,
+        rgba(220, 211, 203, 0.35) 25%,
+        rgba(245, 239, 234, 0.8) 37%,
+        rgba(220, 211, 203, 0.35) 63%
+      );
+      background-size: 400% 100%;
+      animation: shimmer 1.3s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 100% 0; }
+      100% { background-position: -100% 0; }
+    }
+
+    @media (min-width: 680px) {
+      .products {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .product-image-wrap,
+      .product-image {
+        min-height: 120px;
+      }
+
+      .product-image-wrap {
+        flex-basis: 120px;
+        width: 120px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html {
+        scroll-behavior: auto;
+      }
+
+      *,
+      *::before,
+      *::after {
+        transition: none !important;
+        animation: none !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="hero">
+    <div class="container hero-content">
+      <div class="brand-icon" aria-hidden="true">☕</div>
+      <h1>منوی کافه</h1>
+      <p>انتخابت را با خیال راحت انجام بده</p>
+
+      <div class="status-bar" id="statusBar" aria-live="polite">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">در حال دریافت منو...</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="categories-wrap container" id="categoriesNav" aria-label="دسته‌بندی‌های منو">
+    <div class="categories" id="categories"></div>
+  </nav>
+
+  <main class="container main">
+    <section class="state" id="loadingState">
+      <div class="state-icon">☕</div>
+      <h2>در حال آماده‌سازی منو...</h2>
+      <p>لطفاً چند لحظه صبر کنید.</p>
+    </section>
+
+    <section class="state hidden" id="errorState" role="alert">
+      <div class="state-icon">⚠️</div>
+      <h2>دریافت منو با مشکل مواجه شد</h2>
+      <p id="errorMessage">
+        اتصال به سرور برقرار نشد. اتصال اینترنت یا اجرای بک‌اند را بررسی کنید.
+      </p>
+      <button class="retry-btn" id="retryButton" type="button">تلاش دوباره</button>
+    </section>
+
+    <div id="menuSections"></div>
+  </main>
+
+  <footer class="container">
+    منوی دیجیتال کافه
+  </footer>
+
+  <script>
+    // آدرس‌های API بک‌اند
+    const API_BASE_URL = `http://${window.location.hostname}:8000/api` ;
+
+    const categoriesEl = document.getElementById("categories");
+    const menuSectionsEl = document.getElementById("menuSections");
+    const loadingStateEl = document.getElementById("loadingState");
+    const errorStateEl = document.getElementById("errorState");
+    const errorMessageEl = document.getElementById("errorMessage");
+    const retryButton = document.getElementById("retryButton");
+    const statusTextEl = document.getElementById("statusText");
+    const statusDotEl = document.getElementById("statusDot");
+
+    let categoriesData = [];
+    let productsData = [];
+
+    function formatPrice(price) {
+      const number = Number(price);
+
+      if (!Number.isFinite(number)) {
+        return "قیمت نامشخص";
+      }
+
+      return new Intl.NumberFormat("fa-IR").format(number) + " تومان";
+    }
+
+    function escapeHtml(value) {
+      const div = document.createElement("div");
+      div.textContent = value ?? "";
+      return div.innerHTML;
+    }
+
+    function setStatus(message, isError = false) {
+      statusTextEl.textContent = message;
+      statusDotEl.classList.toggle("error", isError);
+    }
+
+    function showLoading() {
+      loadingStateEl.classList.remove("hidden");
+      errorStateEl.classList.add("hidden");
+      menuSectionsEl.innerHTML = "";
+      categoriesEl.innerHTML = "";
+      setStatus("در حال دریافت منو...", false);
+    }
+
+    function showError(message) {
+      loadingStateEl.classList.add("hidden");
+      errorStateEl.classList.remove("hidden");
+      menuSectionsEl.innerHTML = "";
+      categoriesEl.innerHTML = "";
+      errorMessageEl.textContent = message;
+      setStatus("ارتباط با سرور برقرار نیست", true);
+    }
+
+    function showSuccess() {
+      loadingStateEl.classList.add("hidden");
+      errorStateEl.classList.add("hidden");
+      setStatus("منو با موفقیت بارگذاری شد", false);
+    }
+
+    async function fetchJson(url) {
+      const response = await fetch(url, {
+        method: "GET",
+        headers: {
+          "Accept": "application/json"
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+
+      return response.json();
+    }
+
+    function renderCategories() {
+      if (!categoriesData.length) {
+        categoriesEl.innerHTML = "";
+        return;
+      }
+
+      categoriesEl.innerHTML = categoriesData.map((category, index) => `
+        <button
+          class="category-btn ${index === 0 ? "active" : ""}"
+          type="button"
+          data-target="category-${category.id}"
+        >
+          ${escapeHtml(category.name)}
+        </button>
+      `).join("");
+
+      categoriesEl.querySelectorAll(".category-btn").forEach(button => {
+        button.addEventListener("click", () => {
+          const target = document.getElementById(button.dataset.target);
+
+          categoriesEl.querySelectorAll(".category-btn").forEach(btn => {
+            btn.classList.remove("active");
+          });
+
+          button.classList.add("active");
+
+          if (target) {
+            target.scrollIntoView({
+              behavior: "smooth",
+              block: "start"
+            });
+          }
+        });
+      });
+    }
+
+    function createProductCard(product) {
+      const unavailable = product.available === false;
+
+      return `
+        <article class="product-card ${unavailable ? "unavailable" : ""}">
+          <div class="product-image-wrap">
+            ${
+              product.image_url
+                ? `
+                  <img
+                    class="product-image"
+                    src="${escapeHtml(product.image_url)}"
+                    alt="${escapeHtml(product.name)}"
+                    loading="lazy"
+                    onerror="this.style.display='none'; this.nextElementSibling.style.display='grid';"
+                  />
+                `
+                : ""
+            }
+            <div class="image-fallback" aria-hidden="true">☕</div>
+          </div>
+
+          <div class="product-info">
+            <div class="product-top">
+              <h3 class="product-name">${escapeHtml(product.name)}</h3>
+              ${unavailable ? '<span class="badge">ناموجود</span>' : ""}
+            </div>
+
+            <p class="description">
+              ${product.description ? escapeHtml(product.description) : "توضیحی برای این محصول ثبت نشده است."}
+            </p>
+
+            <div class="price">
+              ${formatPrice(product.price)}
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function renderMenu() {
+      menuSectionsEl.innerHTML = "";
+
+      categoriesData.forEach(category => {
+        const products = productsData.filter(
+          product => Number(product.category_id) === Number(category.id)
+        );
+
+        const section = document.createElement("section");
+        section.className = "menu-section";
+        section.id = `category-${category.id}`;
+
+        const productsHtml = products.length
+          ? products.map(createProductCard).join("")
+          : `<div class="empty-category">فعلاً محصولی در این دسته ثبت نشده است.</div>`;
+
+        section.innerHTML = `
+          <div class="section-header">
+            <h2 class="section-title">${escapeHtml(category.name)}</h2>
+            <span class="count">${products.length} محصول</span>
+          </div>
+
+          <div class="products">
+            ${productsHtml}
+          </div>
+        `;
+
+        menuSectionsEl.appendChild(section);
+      });
+
+      // محصولی که دسته‌بندی‌اش در API دسته‌ها وجود ندارد، نادیده گرفته می‌شود.
+      // چون صفحه فقط باید محصولات مرتبط با هر دسته را نمایش بدهد.
+    }
+
+    async function loadMenu() {
+      showLoading();
+
+      try {
+        const [categories, products] = await Promise.all([
+          fetchJson(`${API_BASE_URL}/categories/`),
+          fetchJson(`${API_BASE_URL}/products/`)
+        ]);
+
+        if (!Array.isArray(categories) || !Array.isArray(products)) {
+          throw new Error("فرمت داده دریافتی از API معتبر نیست.");
+        }
+
+        categoriesData = categories;
+        productsData = products;
+
+        renderCategories();
+        renderMenu();
+        showSuccess();
+      } catch (error) {
+        console.error("Menu API Error:", error);
+
+        showError(
+          "نتوانستیم اطلاعات منو را از سرور دریافت کنیم. " +
+          "مطمئن شوید FastAPI روی پورت 8000 اجراست و دسترسی CORS برای فرانت‌اند تنظیم شده است."
+        );
+      }
+    }
+
+    retryButton.addEventListener("click", loadMenu);
+
+    loadMenu();
+  </script>
+</body>
+</html>
