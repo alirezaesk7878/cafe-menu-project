@@ -1,33 +1,20 @@
-# منوی دیجیتال کافه — بخش نمایش منو
+# منوی دیجیتال کافه
 
 ## نحوه اجرا
 
 1. نصب کتابخانه‌ها:
-
-cat > README.md << 'EOF'
-# منوی دیجیتال کافه — بخش نمایش منو
-
-## نحوه اجرا
-
-1. نصب کتابخانه‌ها:
-
-
-cat > README.md << 'EOF'
-# منوی دیجیتال کافه — بخش نمایش منو
-
-## نحوه اجرا
-
-1. نصب کتابخانه‌ها:
-pip install -r requirements.txt
+   pip install -r requirements.txt
 
 2. اجرای سرور بک‌اند:
-uvicorn main:app --reload
+   python -m uvicorn main:app --reload
 
-3. باز کردن مستندات API:
-http://127.0.0.1:8000/docs
+3. مستندات API:
+   http://127.0.0.1:8000/docs
 
-4. باز کردن فرانت‌اند:
-فایل front-end/index.html را با Live Server باز کنید.
+4. فرانت‌اند: فایل front-end/index.html را با Live Server باز کنید.
+
+5. برای داده‌ی تستی (اختیاری):
+   python seed.py
 
 ## اندپوینت‌ها
 
