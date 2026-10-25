@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>پنل مدیریت منو</title>
+<style>
+:root{--bg:#f7f3ee;--card:#fffdf9;--text:#2b2522;--muted:#776e68;--accent:#7a4e32;--accent-d:#5e3a25;--line:#e8ded4;--bad:#a34545;--ok:#2f6b3f}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:Tahoma,"Segoe UI",Arial,sans-serif;line-height:1.7;padding-bottom:40px}
+header{background:#2f221b;color:#fff;padding:16px 0}
+.wrap{width:min(100% - 24px,960px);margin-inline:auto}
+header .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px}
+h1{font-size:1.15rem}
+h2{font-size:1.02rem;margin-bottom:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:16px}
+label{display:block;font-size:.85rem;color:var(--muted);margin-bottom:3px}
+input,select,textarea{width:100%;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:#fff;color:var(--text)}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.full{grid-column:1/-1}
+.check{display:flex;align-items:center;gap:8px}
+.check input{width:auto}
+button{font:inherit;cursor:pointer;border:0;border-radius:9px;padding:8px 14px;background:var(--accent);color:#fff}
+button:hover{background:var(--accent-d)}
+button.ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.4)}
+button.small{padding:5px 10px;font-size:.82rem}
+button.soft{background:#efe6dc;color:var(--accent-d)}
+button.danger{background:#f3dddd;color:var(--bad)}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:620px}
+th,td{padding:9px 8px;text-align:right;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:.82rem;color:var(--muted);font-weight:600}
+td input{width:110px}
+.price-cell{display:flex;gap:6px;align-items:center}
+.off{color:var(--bad)}
+.on{color:var(--ok)}
+.empty{text-align:center;color:var(--muted);padding:18px}
+ul{list-style:none}
+li{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.row{display:flex;gap:8px;margin-bottom:10px}
+#msg{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);padding:10px 18px;border-radius:10px;color:#fff;z-index:10;max-width:90%}
+#msg.ok{background:var(--ok)}
+#msg.bad{background:var(--bad)}
+#loginBox{max-width:360px;margin:40px auto 0}
+#loginBox .grid{grid-template-columns:1fr}
+[hidden]{display:none!important}
+@media(max-width:560px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="wrap"><h1>پنل مدیریت منو</h1><button class="ghost small" id="logout" hidden>خروج</button></div></header>
+
+<main class="wrap">
+  <section class="card" id="loginBox">
+    <h2>ورود مدیر</h2>
+    <form id="loginForm" class="grid">
+      <div><label for="u">نام کاربری</label><input id="u" autocomplete="username" required></div>
+      <div><label for="p">رمز عبور</label><input id="p" type="password" autocomplete="current-password" required></div>
+      <button type="submit">ورود</button>
+    </form>
+  </section>
+
+  <div id="panel" hidden>
+    <section class="card">
+      <h2>افزودن محصول</h2>
+      <form id="prodForm" class="grid">
+        <div><label for="pName">نام</label><input id="pName" required></div>
+        <div><label for="pPrice">قیمت (تومان)</label><input id="pPrice" type="number" min="0" step="1" required></div>
+        <div><label for="pCat">دسته‌بندی</label><select id="pCat"></select></div>
+        <div><label for="pImg">آدرس تصویر (اختیاری)</label><input id="pImg"></div>
+        <div class="full"><label for="pDesc">توضیحات</label><input id="pDesc"></div>
+        <label class="check"><input id="pAvail" type="checkbox" checked> موجود است</label>
+        <div><button type="submit">افزودن محصول</button></div>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>محصولات</h2>
+      <div class="scroll"><table>
+        <thead><tr><th>نام</th><th>دسته</th><th>قیمت</th><th>وضعیت</th><th></th></tr></thead>
+        <tbody id="pList"></tbody>
+      </table></div>
+    </section>
+
+    <section class="card">
+      <h2>دسته‌بندی‌ها</h2>
+      <form id="catForm" class="row">
+        <input id="cName" placeholder="نام دسته جدید" required>
+        <button type="submit">افزودن</button>
+      </form>
+      <ul id="cList"></ul>
+    </section>
+  </div>
+</main>
+<div id="msg" hidden></div>
+
+<script>
+const API = "http://127.0.0.1:8000/api";
+let token = sessionStorage.getItem("token");
+let categories = [];
+let products = [];
+const $ = id => document.getElementById(id);
+
+const FA = {
+  "Wrong username or password": "نام کاربری یا رمز عبور اشتباه است",
+  "Category has products, delete or move them first": "این دسته محصول دارد؛ اول محصولاتش را حذف یا منتقل کن",
+  "Category not found": "دسته‌بندی پیدا نشد",
+  "Product not found": "محصول پیدا نشد"
+};
+
+function esc(s) {
+  const d = document.createElement("div");
+  d.textContent = s ?? "";
+  return d.innerHTML;
+}
+
+function say(text, bad) {
+  const m = $("msg");
+  m.textContent = text;
+  m.className = bad ? "bad" : "ok";
+  m.hidden = false;
+  clearTimeout(say.t);
+  say.t = setTimeout(() => { m.hidden = true; }, 4000);
+}
+
+async function api(path, method = "GET", body) {
+  const opts = { method, headers: {} };
+  if (body) {
+    opts.headers["Content-Type"] = "application/json";
+    opts.body = JSON.stringify(body);
+  }
+  if (token) opts.headers.Authorization = "Bearer " + token;
+
+  let res;
+  try {
+    res = await fetch(API + path, opts);
+  } catch (e) {
+    throw new Error("اتصال به سرور برقرار نشد. سرور بک‌اند روشن است؟");
+  }
+  if (res.status === 401 && token) {
+    logout();
+    throw new Error("نشست تمام شد، دوباره وارد شو.");
+  }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const d = typeof data.detail === "string" ? data.detail : "";
+    throw new Error(FA[d] || d || "درخواست انجام نشد");
+  }
+  return data;
+}
+
+function show() {
+  const on = !!token;
+  $("loginBox").hidden = on;
+  $("panel").hidden = !on;
+  $("logout").hidden = !on;
+  if (on) load();
+}
+
+function logout() {
+  token = null;
+  sessionStorage.removeItem("token");
+  show();
+}
+
+async function load() {
+  try {
+    const [c, p] = await Promise.all([api("/categories/"), api("/products/")]);
+    categories = c;
+    products = p;
+    render();
+  } catch (e) {
+    say(e.message, true);
+  }
+}
+
+function render() {
+  $("pCat").innerHTML = categories.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join("");
+
+  const catName = id => (categories.find(c => c.id === id) || {}).name || "—";
+
+  $("pList").innerHTML = products.length
+    ? products.map(p => `
+      <tr>
+        <td>${esc(p.name)}</td>
+        <td>${esc(catName(p.category_id))}</td>
+        <td><div class="price-cell">
+          <input id="price-${p.id}" type="number" min="0" step="1" value="${p.price}" aria-label="قیمت ${esc(p.name)}">
+          <button class="small soft" data-act="price" data-id="${p.id}">ذخیره</button>
+        </div></td>
+        <td><button class="small soft ${p.available ? "on" : "off"}" data-act="toggle" data-id="${p.id}">${p.available ? "موجود" : "ناموجود"}</button></td>
+        <td><button class="small danger" data-act="delprod" data-id="${p.id}">حذف</button></td>
+      </tr>`).join("")
+    : `<tr><td colspan="5" class="empty">هنوز محصولی ثبت نشده. از فرم بالا اولین محصول را اضافه کن.</td></tr>`;
+
+  $("cList").innerHTML = categories.length
+    ? categories.map(c => `<li><span>${esc(c.name)}</span><button class="small danger" data-act="delcat" data-id="${c.id}">حذف</button></li>`).join("")
+    : `<li class="empty">هنوز دسته‌ای نداری. اول یک دسته بساز.</li>`;
+}
+
+document.addEventListener("click", async e => {
+  const b = e.target.closest("[data-act]");
+  if (!b) return;
+  const id = Number(b.dataset.id);
+  try {
+    if (b.dataset.act === "price") {
+      const v = Number($("price-" + id).value);
+      if (!Number.isInteger(v) || v < 0) { say("قیمت را به صورت عدد صحیح وارد کن", true); return; }
+      await api("/products/" + id, "PUT", { price: v });
+      say("قیمت ذخیره شد");
+    } else if (b.dataset.act === "toggle") {
+      const p = products.find(x => x.id === id);
+      await api("/products/" + id, "PUT", { available: !p.available });
+      say(p.available ? "محصول ناموجود شد" : "محصول موجود شد");
+    } else if (b.dataset.act === "delprod") {
+      if (!confirm("این محصول حذف شود؟")) return;
+      await api("/products/" + id, "DELETE");
+      say("محصول حذف شد");
+    } else if (b.dataset.act === "delcat") {
+      if (!confirm("این دسته حذف شود؟")) return;
+      await api("/categories/" + id, "DELETE");
+      say("دسته حذف شد");
+    }
+    await load();
+  } catch (err) {
+    say(err.message, true);
+  }
+});
+
+$("loginForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  try {
+    const r = await api("/auth/login/", "POST", { username: $("u").value, password: $("p").value });
+    token = r.access_token;
+    sessionStorage.setItem("token", token);
+    $("p").value = "";
+    show();
+  } catch (err) {
+    say(err.message, true);
+  }
+});
+
+$("prodForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const body = {
+    name: $("pName").value.trim(),
+    price: Number($("pPrice").value),
+    description: $("pDesc").value.trim() || null,
+    image_url: $("pImg").value.trim() || null,
+    available: $("pAvail").checked,
+    category_id: Number($("pCat").value)
+  };
+  if (!body.category_id) { say("اول یک دسته‌بندی بساز", true); return; }
+  try {
+    await api("/products/", "POST", body);
+    e.target.reset();
+    say("محصول اضافه شد");
+    await load();
+  } catch (err) {
+    say(err.message, true);
+  }
+});
+
+$("catForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  try {
+    await api("/categories/", "POST", { name: $("cName").value.trim() });
+    e.target.reset();
+    say("دسته اضافه شد");
+    await load();
+  } catch (err) {
+    say(err.message, true);
+  }
+});
+
+$("logout").addEventListener("click", logout);
+show();
+</script>
+</body>
+</html>
